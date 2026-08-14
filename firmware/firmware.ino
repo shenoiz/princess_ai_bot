@@ -6,7 +6,8 @@
 // Spkr : MSB 32bit Mono — 16bit samples padded to 32bit
 // ═══════════════════════════════════════════════════════════
 
-#define FW_VERSION "1.0.0"
+
+#define FW_VERSION "1.0.3"
 
 #include "secrets.h"
 #include "faces.h"
