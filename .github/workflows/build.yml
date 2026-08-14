@@ -30,7 +30,10 @@ jobs:
   build:
     name: Compile and Release
     runs-on: ubuntu-latest
-
+    
+    permissions:
+      contents: write    # needed to create releases and push version.txt
+      
     steps:
 
       # ── 1. Full git history needed for commit-count versioning
