@@ -73,7 +73,6 @@ jobs:
           #define WIFI_SSID    "${{ secrets.WIFI_SSID }}"
           #define WIFI_PASS    "${{ secrets.WIFI_PASS }}"
           #define GROQ_KEY     "${{ secrets.GROQ_KEY }}"
-          #define HF_TOKEN     "${{ secrets.HF_TOKEN }}"
           #define VOICERSS_KEY "${{ secrets.VOICERSS_KEY }}"
           EOF
 
