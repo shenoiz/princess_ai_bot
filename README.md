@@ -1,3 +1,9 @@
+![CI](https://github.com/shenoiz/princess_ai_bot/actions/workflows/build.yml/badge.svg)
+![ESP32-S3](https://img.shields.io/badge/ESP32--S3-E7352C?style=for-the-badge&logo=espressif&logoColor=white)
+![Arduino IDE](https://img.shields.io/badge/Arduino_IDE-00979D?style=for-the-badge&logo=arduino&logoColor=white)
+![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-In%20Progress-orange)
 # 👑 Sparkle — Princess AI Buddy
 
 > A voice-in, voice-out AI toy for your little princess.  
