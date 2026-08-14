@@ -1,0 +1,132 @@
+# ============================================================
+#  Sparkle AI Buddy — GitHub Actions CI/CD Pipeline
+#
+#  Triggers ONLY when a Pull Request is merged into main.
+#  Direct pushes to main are blocked by branch protection.
+#
+#  What this does:
+#    1. Installs arduino-cli
+#    2. Installs ESP32-S3 board support (Espressif core 3.0.7)
+#    3. Installs required libraries
+#    4. Generates secrets.h from GitHub Secrets (keys never in repo)
+#    5. Bumps version using git commit count → writes version.txt
+#    6. Compiles firmware for ESP32-S3-WROOM1-N16R8
+#         Flash : 16MB
+#         PSRAM : OPI (8MB)
+#         Partition : huge_app (required for OTA)
+#    7. Creates GitHub Release and attaches .bin
+#    8. Commits updated version.txt back to main
+#       (ESP32 reads this file on boot to detect new firmware)
+# ============================================================
+
+name: Build and Release Firmware
+
+on:
+  push:
+    branches:
+      - main          # fires only when PR is merged into main
+
+jobs:
+  build:
+    name: Compile and Release
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ── 1. Full git history needed for commit-count versioning
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Install arduino-cli
+      - name: Install arduino-cli
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+          echo "$HOME/bin" >> $GITHUB_PATH
+
+      # ── 3. Add ESP32-S3 board support
+      - name: Install ESP32 core
+        run: |
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls \
+            https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32@3.0.7
+
+      # ── 4. Install all libraries used in the firmware
+      - name: Install libraries
+        run: |
+          arduino-cli lib install "Adafruit SSD1306"
+          arduino-cli lib install "Adafruit GFX Library"
+          arduino-cli lib install "Adafruit NeoPixel"
+          arduino-cli lib install "ArduinoJson"
+
+      # ── 5. Generate secrets.h from GitHub Secrets
+      #       Real credentials never appear in the repo.
+      #       The generated file is used only during this build.
+      - name: Generate secrets.h
+        run: |
+          cat > firmware/secrets.h << 'EOF'
+          #pragma once
+          #define WIFI_SSID    "${{ secrets.WIFI_SSID }}"
+          #define WIFI_PASS    "${{ secrets.WIFI_PASS }}"
+          #define GROQ_KEY     "${{ secrets.GROQ_KEY }}"
+          #define HF_TOKEN     "${{ secrets.HF_TOKEN }}"
+          #define VOICERSS_KEY "${{ secrets.VOICERSS_KEY }}"
+          EOF
+
+      # ── 6. Bump version using git commit count (1.0.N)
+      #       Also injects version into firmware.ino before compile.
+      - name: Set version
+        id: version
+        run: |
+          COUNT=$(git rev-list --count HEAD)
+          VERSION="1.0.$COUNT"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo $VERSION > version.txt
+          sed -i "s/#define FW_VERSION \".*\"/#define FW_VERSION \"$VERSION\"/" firmware/firmware.ino
+
+      # ── 7. Compile for ESP32-S3-WROOM1-N16R8
+      #       PSRAM=opi    → enables 8MB OPI PSRAM (ps_malloc)
+      #       huge_app     → 3MB app partition required for OTA to work
+      - name: Compile firmware
+        run: |
+          arduino-cli compile \
+            --fqbn "esp32:esp32:esp32s3:FlashSize=16M,PartitionScheme=huge_app,PSRAM=opi,USBMode=hwcdc,CDCOnBoot=cdc" \
+            --output-dir build/ \
+            firmware/firmware.ino
+
+      # ── 8. Create GitHub Release and attach the .bin
+      #       OTA checker on the device downloads this .bin
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Firmware v${{ env.VERSION }}
+          files: build/firmware.ino.bin
+          body: |
+            Auto-built from commit ${{ github.sha }}
+            Merged to main via Pull Request.
+            
+            Flash manually:
+              esptool.py --chip esp32s3 write_flash 0x0 firmware.ino.bin
+            
+            OTA: device downloads this automatically on next boot.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 9. Commit updated version.txt back to main
+      #       The ESP32 fetches this file on every boot.
+      #       If the version differs from FW_VERSION it downloads the new .bin.
+      - name: Commit version.txt
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.txt
+          git diff --staged --quiet || \
+            git commit -m "ci: bump version to ${{ env.VERSION }} [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,12 @@
+# secrets — never commit real values
+firmware/secrets.h
+
+# build artifacts
+build/
+*.bin
+*.elf
+*.map
+
+# OS
+.DS_Store
+Thumbs.db
