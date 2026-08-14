@@ -43,25 +43,28 @@ jobs:
       # ── 2. Install arduino-cli
       - name: Install arduino-cli
         run: |
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+          mkdir -p $HOME/bin
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh \
+            | BINDIR=$HOME/bin sh
           echo "$HOME/bin" >> $GITHUB_PATH
-
+          $HOME/bin/arduino-cli version
+          
       # ── 3. Add ESP32-S3 board support
       - name: Install ESP32 core
         run: |
-          arduino-cli config init
-          arduino-cli config add board_manager.additional_urls \
+          $HOME/bin/arduino-cli config init
+          $HOME/bin/arduino-cli config add board_manager.additional_urls \
             https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-          arduino-cli core update-index
-          arduino-cli core install esp32:esp32@3.0.7
+          $HOME/bin/arduino-cli core update-index
+          $HOME/bin/arduino-cli core install esp32:esp32@3.0.7
 
       # ── 4. Install all libraries used in the firmware
       - name: Install libraries
         run: |
-          arduino-cli lib install "Adafruit SSD1306"
-          arduino-cli lib install "Adafruit GFX Library"
-          arduino-cli lib install "Adafruit NeoPixel"
-          arduino-cli lib install "ArduinoJson"
+          $HOME/bin/arduino-cli lib install "Adafruit SSD1306"
+          $HOME/bin/arduino-cli lib install "Adafruit GFX Library"
+          $HOME/bin/arduino-cli lib install "Adafruit NeoPixel"
+          $HOME/bin/arduino-cli lib install "ArduinoJson"
 
       # ── 5. Generate secrets.h from GitHub Secrets
       #       Real credentials never appear in the repo.
@@ -92,7 +95,7 @@ jobs:
       #       huge_app     → 3MB app partition required for OTA to work
       - name: Compile firmware
         run: |
-          arduino-cli compile \
+          $HOME/bin/arduino-cli compile \
             --fqbn "esp32:esp32:esp32s3:FlashSize=16M,PartitionScheme=huge_app,PSRAM=opi,USBMode=hwcdc,CDCOnBoot=cdc" \
             --output-dir build/ \
             firmware/firmware.ino
