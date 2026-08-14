@@ -125,13 +125,21 @@ jobs:
       # ── 9. Commit updated version.txt back to main
       #       The ESP32 fetches this file on every boot.
       #       If the version differs from FW_VERSION it downloads the new .bin.
-      - name: Commit version.txt
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add version.txt
-          git diff --staged --quiet || \
-            git commit -m "ci: bump version to ${{ env.VERSION }} [skip ci]"
-          git push
+      - name: Update version.txt via GitHub API
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          SHA=$(curl -s \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/contents/version.txt" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['sha'])")
+          CONTENT=$(echo -n "$VERSION" | base64)
+          curl -s -X PUT \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/contents/version.txt" \
+            -d "{\"message\":\"ci: bump version to $VERSION [skip ci]\",\"content\":\"$CONTENT\",\"sha\":\"$SHA\"}"
+          echo "version.txt updated to $VERSION"
