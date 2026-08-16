@@ -85,14 +85,12 @@ jobs:
       # ── 6. Bump version using git commit count (1.0.N)
       #       Also injects version into firmware.ino before compile.
       - name: Set version
-        id: version
         run: |
-          COUNT=$(git rev-list --count HEAD)
-          VERSION="1.0.$COUNT"
+          VERSION="1.0.${{ github.run_number }}"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo $VERSION > version.txt
+          echo -n "$VERSION" > version.txt
           sed -i "s/#define FW_VERSION \".*\"/#define FW_VERSION \"$VERSION\"/" firmware/firmware.ino
-
+          
       # ── 7. Compile for ESP32-S3-WROOM1-N16R8
       #       PSRAM=opi    → enables 8MB OPI PSRAM (ps_malloc)
       #       huge_app     → 3MB app partition required for OTA to work
