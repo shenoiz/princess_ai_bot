@@ -104,11 +104,29 @@ void checkAndUpdate(String currentVersion) {
   Serial.println("OTA: downloading " + binUrl);
   showOLED("Update found!\n" + latest + "\nDownloading...");
 
+  // Follow the redirect manually to get the real download URL
   WiFiClientSecure client;
   client.setInsecure();
-  httpUpdate.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
-  t_httpUpdate_return ret = httpUpdate.update(client, binUrl);
+  HTTPClient http;
+  http.begin(client, binUrl);
+  http.setTimeout(5000);
+  // Use GET with redirect following to find final URL
+  http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
+  int code = http.GET();
+  String finalUrl = http.getLocation();
+  http.end();
 
+  // If we got a redirect location use it, otherwise use original
+  if (finalUrl == "" || finalUrl == binUrl) {
+    finalUrl = binUrl;
+  }
+  Serial.println("OTA: final URL " + finalUrl);
+
+  WiFiClientSecure client2;
+  client2.setInsecure();
+  httpUpdate.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
+  t_httpUpdate_return ret = httpUpdate.update(client2, finalUrl);
+  
   switch (ret) {
     case HTTP_UPDATE_OK:
       // Device reboots automatically — never reaches here
