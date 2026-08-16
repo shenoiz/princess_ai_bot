@@ -97,7 +97,7 @@ jobs:
       - name: Compile firmware
         run: |
           $HOME/bin/arduino-cli compile \
-            --fqbn "esp32:esp32:esp32s3:FlashSize=16M,PartitionScheme=huge_app,PSRAM=opi,USBMode=hwcdc,CDCOnBoot=cdc" \
+            --fqbn "esp32:esp32:esp32s3:FlashSize=16M,PartitionScheme=app3M_fat9M_16MB,PSRAM=opi,USBMode=hwcdc,CDCOnBoot=cdc" \
             --output-dir build/ \
             firmware/firmware.ino
 
