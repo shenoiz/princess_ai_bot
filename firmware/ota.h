@@ -106,7 +106,7 @@ void checkAndUpdate(String currentVersion) {
 
   WiFiClientSecure client;
   client.setInsecure();
-  httpUpdate.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
+  httpUpdate.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
   t_httpUpdate_return ret = httpUpdate.update(client, binUrl);
 
   switch (ret) {
