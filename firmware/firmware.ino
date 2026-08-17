@@ -28,8 +28,8 @@ const char* SYSTEM_PROMPT =
 #define SAMPLE_RATE   16000
 #define MAX_REC_SECS  8
 #define PITCH_FACTOR  1.35f
-#define MAX_TOKENS    120
-#define MAX_HISTORY   6
+#define MAX_TOKENS    60 //earlier 120
+#define MAX_HISTORY   3 //earlier 6
 
 #define BTN_PIN  0
 #define LED_PIN  4
@@ -322,8 +322,8 @@ String askAI(String userText) {
   int code = http.POST(body);
   String reply = "Can you ask me again please?";
   if(code == 200) {
-    String raw = http.getString();
-    Serial.println("AI raw: " + raw);
+    //String raw = http.getString();
+    //Serial.println("AI raw: " + raw);
     DynamicJsonDocument doc(4096);
     deserializeJson(doc, raw);
     reply = doc["choices"][0]["message"]["content"].as<String>();
