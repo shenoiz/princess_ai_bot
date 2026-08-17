@@ -283,7 +283,7 @@ String transcribe(int16_t* audio, int samples) {
   return res;
 }
 
-// ── Groq openai/gpt-oss-20b ───────────────────────────────────────────
+// ── Groq groq/compound-mini ───────────────────────────────────────────
 String askAI(String userText) {
 
   String safeUser = userText;
@@ -303,7 +303,7 @@ String askAI(String userText) {
               + String(SYSTEM_PROMPT) + "\"},"
               + chatHistory.substring(0, chatHistory.length()-1)
               + "]";
-  String body = "{\"model\":\"openai/gpt-oss-20b\","
+  String body = "{\"model\":\"groq/compound-mini\","
                 "\"max_tokens\":" + String(MAX_TOKENS) + ","
                 "\"temperature\":0.8,"
                 "\"messages\":" + msgs + "}";
