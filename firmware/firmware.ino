@@ -283,7 +283,7 @@ String transcribe(int16_t* audio, int samples) {
   return res;
 }
 
-// ── Groq LLaMA 3.1 ───────────────────────────────────────────
+// ── Groq openai/gpt-oss-20b ───────────────────────────────────────────
 String askAI(String userText) {
 
   String safeUser = userText;
@@ -303,7 +303,7 @@ String askAI(String userText) {
               + String(SYSTEM_PROMPT) + "\"},"
               + chatHistory.substring(0, chatHistory.length()-1)
               + "]";
-  String body = "{\"model\":\"llama-3.1-8b-instant\","
+  String body = "{\"model\":\"openai/gpt-oss-20b\","
                 "\"max_tokens\":" + String(MAX_TOKENS) + ","
                 "\"temperature\":0.8,"
                 "\"messages\":" + msgs + "}";
