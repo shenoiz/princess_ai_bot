@@ -322,8 +322,10 @@ String askAI(String userText) {
   int code = http.POST(body);
   String reply = "Can you ask me again please?";
   if(code == 200) {
+    String raw = http.getString();
+    Serial.println("AI raw: " + raw);
     DynamicJsonDocument doc(4096);
-    deserializeJson(doc, http.getString());
+    deserializeJson(doc, raw);
     reply = doc["choices"][0]["message"]["content"].as<String>();
     reply.trim();
   } else {
