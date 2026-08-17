@@ -321,28 +321,13 @@ String askAI(String userText) {
   http.addHeader("Connection", "close");
   int code = http.POST(body);
   String reply = "Can you ask me again please?";
-/*  if(code == 200) {
+  if(code == 200) {
     DynamicJsonDocument doc(4096);
     deserializeJson(doc, http.getString());
     reply = doc["choices"][0]["message"]["content"].as<String>();
     reply.trim();
   }else {
     Serial.printf("AI error %d\n", code);
-  }*/
-  if(code == 200) {
-    DynamicJsonDocument doc(4096);
-    DeserializationError jsonErr = deserializeJson(doc, http.getString());
-
-    if(!jsonErr && doc["choices"] && doc["choices"][0]["message"]["content"]) {
-      reply = doc["choices"][0]["message"]["content"].as<String>();
-    } else {
-      Serial.println("AI Refusal or unexpected JSON format.");
-      reply = "Oh sparkles! Let's talk about happy things instead!";
-    }
-    reply.trim();
-  } else {
-    Serial.printf("AI error %d\n", code);
-    String flushData = http.getString();
   }
   http.end();
 
@@ -1028,7 +1013,7 @@ void speakText(String text) {
         tail +
         head;
     
-/*    
+
     // ----------------------------------------------------------
     // Before playback begins, wait for the prebuffer.
     // ----------------------------------------------------------
@@ -1071,35 +1056,7 @@ void speakText(String text) {
         continue;
       }
     }
-*/
-
-    if(!started) {
-
-      if(st->producerDone && available < START_BUFFER) {
-        if(available > 0) {
-          started = true;
-        } else {
-          Serial.println("TTS: Aborting—Audio stream completely empty.");
-          break;
-        }
-      }
-      else if(st->producerError) {
-        Serial.println("TTS: producer failed before playback");
-        break;
-      }
-
-      if(available >= START_BUFFER) {
-        started = true;
-        Serial.printf("TTS: playback starting with %u buffered bytes\n", (unsigned)available);
-        Serial.printf("TTS: first audio after %lu ms\n", (unsigned long)(millis() - waitStart));
-      }
-      else {
-        Face::tick();
-        delay(2);
-        continue;
-      }
-    }
-    
+       
     // ----------------------------------------------------------
     // Nothing currently available.
     //
