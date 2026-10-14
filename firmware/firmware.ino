@@ -28,7 +28,7 @@ const char* SYSTEM_PROMPT =
 #define SAMPLE_RATE   16000
 #define MAX_REC_SECS  8
 #define PITCH_FACTOR  1.35f
-#define MAX_TOKENS    60 //earlier 120
+#define MAX_TOKENS    150 //earlier 120
 #define MAX_HISTORY   3 //earlier 6
 
 #define BTN_PIN  0
@@ -306,6 +306,7 @@ String askAI(String userText) {
   String body = "{\"model\":\"openai/gpt-oss-20b\","
                 "\"max_tokens\":" + String(MAX_TOKENS) + ","
                 "\"temperature\":0.8,"
+                "\"reasoning_effort\":\"none\","
                 "\"messages\":" + msgs + "}";
   if(!ensureWiFi()) { return "Can you ask me again please?"; }
   printNetworkState("AI BEFORE");
