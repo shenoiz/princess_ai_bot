@@ -306,7 +306,7 @@ String askAI(String userText) {
   String body = "{\"model\":\"openai/gpt-oss-20b\","
                 "\"max_tokens\":" + String(MAX_TOKENS) + ","
                 "\"temperature\":0.8,"
-                "\"reasoning_effort\":\"none\","
+                "\"reasoning_effort\":\"low\","
                 "\"messages\":" + msgs + "}";
   if(!ensureWiFi()) { return "Can you ask me again please?"; }
   printNetworkState("AI BEFORE");
