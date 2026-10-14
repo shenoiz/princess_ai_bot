@@ -303,7 +303,7 @@ String askAI(String userText) {
               + String(SYSTEM_PROMPT) + "\"},"
               + chatHistory.substring(0, chatHistory.length()-1)
               + "]";
-  String body = "{\"model\":\"groq/compound-mini\","
+  String body = "{\"model\":\"openai/gpt-oss-20b\","
                 "\"max_tokens\":" + String(MAX_TOKENS) + ","
                 "\"temperature\":0.8,"
                 "\"messages\":" + msgs + "}";
